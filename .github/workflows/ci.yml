@@ -1,0 +1,40 @@
+name: C++ Hello CI
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+    branches:
+      - develop
+      - master
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run CI script on Linux/macOS
+        if: runner.os != 'Windows'
+        shell: bash
+        run: ./ci.sh
+
+      - name: Run CI script on Windows
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: ci.bat
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hello-${{ matrix.os }}
+          path: dist/
+          if-no-files-found: error
